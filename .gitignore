@@ -1,0 +1,120 @@
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+.env.md
+
+# Virtual machine / local development compose files (contain real passwords, NEVER commit)
+docker-compose.vm.yml
+docker-compose.dev.yml
+docker-compose.full.yml
+docker-compose.*.local.yml
+docker-compose.override.yml
+
+# Test scripts with hardcoded local database passwords
+backend/test_db.py
+backend/test_connection.py
+
+# Personal notes containing VM IPs (contains private info, never commit)
+prompt.md
+
+# API keys and configuration files
+secrets.json
+secrets.yaml
+secrets.yml
+config.ini
+settings.ini
+api-keys.json
+runtime-config.json
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor and IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Local development databases
+*.db
+*.sqlite
+*.sqlite3
+
+# SSL certificates and keys
+*.pem
+*.key
+*.crt
+*.csr
+
+# Node.js
+node_modules/
+*/node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.temp/
+frontend/.cache/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+backend/venv/
+backend/__pycache__/
+backend/app/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+backend/*.db
+backend/data/
+backend/alembic/versions/*.py
+
+# Runtime and test files
+pids
+*.pid
+*.seed
+*.pid.lock
+coverage/
+test-results/
+playwright-report/
+.cache
+.coverage
+.coverage.*
+.mypy_cache
+.pytest_cache
+.hypothesis

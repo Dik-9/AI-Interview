@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # PostgreSQL数据库（不对外暴露端口，仅容器网络内访问）
+  postgres:
+    image: postgres:17.5
+    container_name: ai-interview-postgres
+    environment:
+      POSTGRES_DB: ai_interview_helper
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ai-interview-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_interview_helper"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis缓存（不对外暴露端口，仅容器网络内访问）
+  redis:
+    image: redis:7.4-alpine
+    container_name: ai-interview-redis
+    networks:
+      - ai-interview-network
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # 后端API服务（不对外暴露端口，仅容器网络内由 nginx 反代访问）
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai-interview-backend
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/ai_interview_helper
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      CORS_ORIGINS: ${CORS_ORIGINS}
+    networks:
+      - ai-interview-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # 前端 nginx 服务（唯一对外暴露端口 80：托管前端静态文件 + 反代 /api 到后端）
+  nginx:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ai-interview-nginx
+    ports:
+      - "80:80"
+    networks:
+      - ai-interview-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  ai-interview-network:
+    driver: bridge
