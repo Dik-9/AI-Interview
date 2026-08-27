@@ -71,6 +71,9 @@ temp/
 *.crt
 *.csr
 
+# Self-signed certs for nginx HTTPS (generated on VM, never commit)
+nginx-certs/
+
 # Node.js
 node_modules/
 */node_modules/
